@@ -33,6 +33,10 @@ Bertrand, Marianne and Sendhil Mullainathan. 2004. "Are Emily and Greg More Empl
 
 * Imagine that you work for a civil rights organization in Chicago. You want to understand the process by which black US citizens are discriminated against in hiring today.
 
+Preceptor/population Table:
+Rows: units (individuals' resumes)
+Columns: outcomes (callback Y/N), covariates (ethnicity, gender, city, etc...), year
+
 ## Data Generating Mechanism
 
 ```{r}
@@ -70,3 +74,29 @@ $$
 What are the questions you want to answer?
 
 How can you use the **marginaleffects** package to answer them?
+
+
+```{r}
+predictions(fit_call, type = "prob")
+data <- plot_predictions(fit_call, type = "prob", by = c("ethnicity", "gender", "city"), draw = FALSE)
+
+# Filter to only group == "yes"
+filtered_data <- data %>%
+  filter(group == "yes")
+
+# Plot
+ggplot(filtered_data, aes(x = city, y = estimate, fill = gender)) +
+  geom_col(position = position_dodge(width = 0.8)) +
+  facet_wrap(~ ethnicity) +
+  labs(
+    title = "Predicted Probabilities by Gender, Ethnicity, and City",
+    y = "Predicted Probability of Getting  a Callback",
+    x = "City"
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    strip.text = element_text(face = "bold")
+  )
+```
